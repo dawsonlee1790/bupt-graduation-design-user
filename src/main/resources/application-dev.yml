@@ -9,7 +9,7 @@ spring:
       ddl-auto: create
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL5Dialect # Hibernate 属性，SQL 方言使得 Hibernate 为所选数据库生成更好的 SQL
+        dialect: org.hibernate.dialect.MySQL5InnoDBDialect # Hibernate 属性，SQL 方言使得 Hibernate 为所选数据库生成更好的 SQL
     show-sql: true
   jackson:
     serialization:
