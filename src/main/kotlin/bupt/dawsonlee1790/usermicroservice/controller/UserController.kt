@@ -1,6 +1,9 @@
 package bupt.dawsonlee1790.usermicroservice.controller
 
 import bupt.dawsonlee1790.usermicroservice.dto.LoginDTO
+import bupt.dawsonlee1790.usermicroservice.dto.RegisterDTO
+import bupt.dawsonlee1790.usermicroservice.entity.User
+import bupt.dawsonlee1790.usermicroservice.repository.GroupRepository
 import bupt.dawsonlee1790.usermicroservice.repository.UserRepository
 import bupt.dawsonlee1790.usermicroservice.util.KeyGenerator
 import io.jsonwebtoken.Jwts
@@ -13,10 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.util.*
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse
 
 @RestController
 @RequestMapping("/UserController")
-@Api(tags = ["用例：用户登陆"])
+@Api(tags = ["用例：用户管理"])
 class UserController {
 
     @Autowired
@@ -36,6 +36,9 @@ class UserController {
     @Autowired
     private lateinit var userRepository: UserRepository
 
+    @Autowired
+    private lateinit var groupRepository: GroupRepository
+
 
     @PostMapping("/login")
     @ApiOperation("登陆")
@@ -43,7 +46,7 @@ class UserController {
             ApiResponse(code = 200, message = "登陆成功body和header（“AUTHORIZATION”）返回JWT的令牌"),
             ApiResponse(code = 400, message = "账号或密码不正确"))
     fun login(@RequestBody @Validated loginDTO: LoginDTO, response: HttpServletResponse): String {
-        println("Hello ${loginDTO.name}!")
+//        println("Hello ${loginDTO.name}!")
         val user = userRepository.findByName(loginDTO.name)
         if (user == null || !user.verifyPassword(loginDTO.passwordToken)) {
             response.status = HttpStatus.BAD_REQUEST.value()
@@ -58,8 +61,8 @@ class UserController {
 //          "iat": 1531308470089,
 //          "exp": 1531310270089,
 //          "role": [
-//              "生产责任人",
-        "叉车工"
+//              "Planner",
+//              "WorkshopManager"
 //          ]
 //        }
         val date = Date()
@@ -73,8 +76,24 @@ class UserController {
                 .signWith(SignatureAlgorithm.HS512, key)
                 .compact()
         println("#### generating token for a key :$jwtToken---$key")
-        response.setHeader(AUTHORIZATION, "$jwtToken")
-        return "$jwtToken"
+        response.setHeader(AUTHORIZATION, jwtToken)
+        return jwtToken
+    }
+
+    @PutMapping
+    @ApiOperation("注册")
+    @ApiResponses(
+            ApiResponse(code = 200, message = "注册成功"),
+            ApiResponse(code = 400, message = "用户名已经存在"))
+    fun register(@RequestBody @Validated registerDTO: RegisterDTO, response: HttpServletResponse): String {
+        if (userRepository.existsByName(registerDTO.name)) {
+            response.status = HttpStatus.BAD_REQUEST.value()
+            return "用户名已经存在"
+        }
+        val roleList = registerDTO.roleList.map { groupRepository.findByName(it.value) }
+        val newUser = User.create(registerDTO.name, registerDTO.password, roleList)
+        userRepository.save(newUser)
+        return "注册成功"
     }
 
 
