@@ -2,9 +2,9 @@ package bupt.dawsonlee1790.usermicroservice
 
 import bupt.dawsonlee1790.usermicroservice.entity.Group
 import bupt.dawsonlee1790.usermicroservice.entity.User
+import bupt.dawsonlee1790.usermicroservice.enums.Role
 import bupt.dawsonlee1790.usermicroservice.repository.GroupRepository
 import bupt.dawsonlee1790.usermicroservice.repository.UserRepository
-import bupt.dawsonlee1790.usermicroservice.util.SHA256
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -17,47 +17,17 @@ class UserMicroserviceApplication {
     @Bean
     @Profile("dev")
     fun init(userRepository: UserRepository, groupRepository: GroupRepository) = CommandLineRunner {
-        val passwordToken = SHA256().getSHA256StrJava("123456789")
-        val user1 = User(
-                name = "Dawson",
-                password = passwordToken
-        )
-        val user2 = User(
-                name = "Mary",
-                password = passwordToken
-        )
-        val user3 = User(
-                name = "Jack",
-                password = passwordToken
-        )
-        val user4 = User(
-                name = "Lina",
-                password = passwordToken
-        )
-        val user5 = User(
-                name = "Doinb",
-                password = passwordToken
-        )
-        val group1 = Group(
-                name = "计划人",
-                description = "制定生产批次计划"
-        )
-        val group2 = Group(
-                name = "研究员",
-                description = "制定SOP流程"
-        )
-        val group3 = Group(
-                name = "叉车工",
-                description = "执行生产指令"
-        )
-        val group4 = Group(
-                name = "车间管理员",
-                description = "执行生产指令"
-        )
-        val group5 = Group(
-                name = "生产负责人",
-                description = "对一个批次的生产负责"
-        )
+        val passwordToken = "123456789"
+        val user1 = User.create("Dawson", passwordToken)
+        val user2 = User.create("Mary", passwordToken)
+        val user3 = User.create("Jack", passwordToken)
+        val user4 = User.create("Lina", passwordToken)
+        val user5 = User.create("Doinb", passwordToken)
+        val group1 = Group.create(Role.Planner)
+        val group2 = Group.create(Role.Researcher)
+        val group3 = Group.create(Role.Forklift)
+        val group4 = Group.create(Role.WorkshopManager)
+        val group5 = Group.create(Role.ProductionLeader)
         group1.userList.add(user1)
         group2.userList.add(user2)
         group3.userList.add(user3)
