@@ -80,7 +80,7 @@ class UserController {
         return jwtToken
     }
 
-    @PutMapping
+    @PutMapping("/register")
     @ApiOperation("注册")
     @ApiResponses(
             ApiResponse(code = 200, message = "注册成功"),
@@ -90,7 +90,7 @@ class UserController {
             response.status = HttpStatus.BAD_REQUEST.value()
             return "用户名已经存在"
         }
-        val roleList = registerDTO.roleList.map { groupRepository.findByName(it.value) }
+        val roleList = registerDTO.roleList.map { groupRepository.findByName(it.name) }
         val newUser = User.create(registerDTO.name, registerDTO.password, roleList)
         userRepository.save(newUser)
         return "注册成功"
