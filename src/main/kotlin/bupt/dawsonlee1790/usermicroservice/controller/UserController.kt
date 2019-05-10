@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiResponse
 import io.swagger.annotations.ApiResponses
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
@@ -38,6 +39,9 @@ class UserController {
 
     @Autowired
     private lateinit var groupRepository: GroupRepository
+
+    @Value("#{systemProperties['os.name']}")
+    private lateinit var osName:String
 
 
     @PostMapping("/login")
@@ -72,6 +76,7 @@ class UserController {
                 .setIssuer(request.requestURL.toString())
                 .setIssuedAt(date)
                 .setExpiration(Date(date.time + 30 * 60 * 1000))
+                .claim("osName", osName)
                 .claim("Role", user.groupList.map { it.name })
                 .signWith(SignatureAlgorithm.HS512, key)
                 .compact()
