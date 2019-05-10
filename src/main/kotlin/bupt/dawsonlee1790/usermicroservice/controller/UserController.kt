@@ -40,8 +40,11 @@ class UserController {
     @Autowired
     private lateinit var groupRepository: GroupRepository
 
-    @Value("#{systemProperties['os.name']}")
-    private lateinit var osName:String
+    @Value("#{T(java.net.InetAddress).getLocalHost().getHostName()}")
+    private lateinit var hostName: String
+
+    @Value("#{T(java.net.InetAddress).getLocalHost().getHostAddress()}")
+    private lateinit var hostAddress: String
 
 
     @PostMapping("/login")
@@ -76,7 +79,8 @@ class UserController {
                 .setIssuer(request.requestURL.toString())
                 .setIssuedAt(date)
                 .setExpiration(Date(date.time + 30 * 60 * 1000))
-                .claim("osName", osName)
+                .claim("HostName", hostName)
+                .claim("HostAddress", hostAddress)
                 .claim("Role", user.groupList.map { it.name })
                 .signWith(SignatureAlgorithm.HS512, key)
                 .compact()
