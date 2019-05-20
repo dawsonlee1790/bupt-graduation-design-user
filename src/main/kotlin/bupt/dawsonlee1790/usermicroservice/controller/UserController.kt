@@ -76,6 +76,7 @@ class UserController {
         val key = keyGenerator.generateKey()
         val jwtToken = Jwts.builder()
                 .setSubject(user.id.toString())
+                .claim("UserName", user.name)
                 .setIssuer(request.requestURL.toString())
                 .setIssuedAt(date)
                 .setExpiration(Date(date.time + 30 * 60 * 1000))
